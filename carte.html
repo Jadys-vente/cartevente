@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Carte interactive</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        #map { height: 500px; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <h2>Carte interactive des adresses</h2>
+    <div id="map"></div>
+
+    <script>
+        // Initialisation de la carte, centrée sur Paris
+        var map = L.map('map').setView([48.8566, 2.3522], 6); // Centrée sur la France
+
+        // Fond de carte OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // URL de ton API Google Apps Script (remplace {ID} par ton ID)
+        var googleSheetAPI = "https://script.google.com/macros/s/AKfycbwXylf8jeSiUblgCSoumYHkO2EFO-BvlxomHJYpCFmIG1XDXtVbieXpc80tIMmFoYAVag/exec"; // Remplace {ID} par ton ID
+
+        fetch(googleSheetAPI)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(row => {
+                    var latitude = parseFloat(row.latitude);
+                    var longitude = parseFloat(row.longitude);
+
+                    // Vérification des coordonnées
+                    if (!isNaN(latitude) && !isNaN(longitude)) {
+                        // Ajouter le marqueur sur la carte
+                        L.marker([latitude, longitude])
+                            .addTo(map)
+                            .bindPopup(`<b>${row.nom} ${row.prenom}</b><br>${row.adresse}, ${row.ville}, ${row.pays}`);
+                    }
+                });
+            })
+            .catch(error => {
+                console.error("Erreur de chargement des données : ", error);
+            });
+    </script>
+
+</body>
+</html>
